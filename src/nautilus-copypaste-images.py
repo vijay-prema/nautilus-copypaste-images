@@ -56,7 +56,7 @@ def get_suported_extensions():
     return extensions
 
 EXTENSIONS_FROM = get_suported_extensions()
-SAVETO = ['.png', '.tif', '.ico', '.bmp']
+SAVETO = ['.png', 'jpg', '.tif', '.ico', '.bmp']
 _ = str
 
 
@@ -116,7 +116,8 @@ class CopyPasteImagesMenuProvider(GObject.GObject, FileManager.MenuProvider):
                 name='CopyPasteImagesMenuProvider::Gtk-paste-image',
                 label='Paste image',
                 tip='Paste image from the clipboard')
-            sub_menuitem02.connect('activate', self.paste_image, window)
+            sub_menuitem02.connect('activate', self.paste_image, sel_items,
+                                   window)
             submenu.append_item(sub_menuitem02)
         sub_menuitem_98 = FileManager.MenuItem(
             name='CopyPasteImagesMenuProvider::Gtk-none',
@@ -148,35 +149,47 @@ class CopyPasteImagesMenuProvider(GObject.GObject, FileManager.MenuProvider):
             self.clipboard.set_image(pixbuf)
             self.clipboard.store()
 
-    def paste_image(self, menu, window):
+    def paste_image(self, menu, files, window):
         pixbuf = self.clipboard.wait_for_image()
         if pixbuf is not None:
-            dialog = Gtk.FileChooserDialog('Guardar la imagen del\
-                                            portapapeles como ...',
+            os.chdir(os.path.dirname(files[0].get_uri()[7:]))
+            dialog = Gtk.FileChooserDialog('Save to Image File from Clipboard',
                                            window,
                                            Gtk.FileChooserAction.SAVE,
                                            (Gtk.STOCK_CANCEL,
                                             Gtk.ResponseType.CANCEL,
-                                            Gtk.STOCK_OPEN,
+                                            Gtk.STOCK_SAVE,
                                             Gtk.ResponseType.OK))
             dialog.set_default_response(Gtk.ResponseType.OK)
             dialog.set_do_overwrite_confirmation(True)
-            dialog.set_current_folder(os.getenv('HOME'))
-            dialog.set_filename('from_copy_paste.png')
-            filter = Gtk.FileFilter()
-            filter.set_name('Imagenes')
-            filter.add_mime_type('image/png')
-            filter.add_pattern('*.png')
-            dialog.add_filter(filter)
+            dialog.set_filename('from_copy_paste')
+            filterP = Gtk.FileFilter()
+            filterP.set_name('Image PNG')
+            filterP.add_mime_type('image/png')
+            filterP.add_pattern('*.png')
+            filterJ = Gtk.FileFilter()
+            filterJ.set_name('Image JPEG')
+            filterJ.add_mime_type('image/jpg')
+            filterJ.add_pattern('*.jpg')
+            dialog.add_filter(filterP)
+            dialog.add_filter(filterJ)
+            dialog.show_all()
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
                 filename = dialog.get_filename()
+                selected_filter = dialog.get_filter().get_name()
                 dialog.destroy()
                 if filename[-4:].lower() in SAVETO:
                     pixbuf.savev(filename, filename[-3:].lower(), (), ())
                 else:
-                    filename = filename + '.png'
-                    pixbuf.savev(filename, 'png', (), ())
+                    if selected_filter == 'Image PNG':
+                        filename = filename + '.png'
+                        pixbuf.savev(filename, 'png', (), ())
+                    else:
+                        filename = filename + '.jpg'
+                        pixbuf.savev(filename, 'jpeg', (), ())
+            else:
+                dialog.destroy()
 
     def about(self, widget, window):
         ad = Gtk.AboutDialog(parent=window)

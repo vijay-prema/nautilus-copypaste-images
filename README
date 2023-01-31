@@ -1,18 +1,23 @@
 nautilus-copypaste-images
 =========================
 
-nautilus-copypaste-images
+Provides a context menu entry in Nautilus (Gnome3 File Browser) to copy/paste the contents of an image file to the clipboard. 
 
-Download
---------
+Fork of [nautilus-copypaste-images](https://github.com/atareao/nautilus-copypaste-images) with fixes:
+ - Add saving jpeg and png file type
+ - Improved file chooser
+   - Closes correctly when cancelled
+   - OK button changed to Save button
+   - Opens in current folder instead of home
 
-Download the [package][dlp] *or* checkout the source:
+Prerequisites
+------------------------
+ - python-nautilus (`sudo apt install python-nautilus`)
 
-    $ git clone https://github.com/atareao/nautilus-copypaste-images.git
-
-Installation
-------------
-
-    $ sudo add-apt-repositoy ppa:atareao/nautilus-extensions
-    $ sudo apt-get update
-    $ sudo apt-get install nautilus-copypaste-images
+Installation (Ubuntu)
+------------------------
+Make sure you have the *Prerequisites* installed first, then run:
+```
+curl -L https://raw.githubusercontent.com/vijay-prema/nautilus-copypaste-images/master/src/nautilus-copypaste-images.py -o /usr/share/nautilus-python/extensions/nautilus-copypaste-images.py
+nautilus -q
+```
